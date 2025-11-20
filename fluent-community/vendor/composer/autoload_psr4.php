@@ -11,4 +11,6 @@ return array(
     'FluentCommunity\\Framework\\' => array($vendorDir . '/wpfluent/framework/src/WPFluent'),
     'FluentCommunity\\Dev\\' => array($baseDir . '/dev'),
     'FluentCommunity\\App\\' => array($baseDir . '/app'),
+    'FluentCommunityPro\\Dev\\' => array($baseDir . '/pro/dev'),
+    'FluentCommunityPro\\App\\' => array($baseDir . '/pro/app'),
 );

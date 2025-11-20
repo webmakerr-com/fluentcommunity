@@ -29,7 +29,9 @@
             "FluentCommunity\\App\\": "app/",
             "FluentCommunity\\Dev\\": "dev/",
             "FluentCommunity\\Framework\\": "vendor/wpfluent/framework/src/WPFluent",
-            "FluentCommunity\\Modules\\": "Modules/"
+            "FluentCommunity\\Modules\\": "Modules/",
+            "FluentCommunityPro\\App\\": "pro/app/",
+            "FluentCommunityPro\\Dev\\": "pro/dev/"
         },
         "classmap": [
             "database/"

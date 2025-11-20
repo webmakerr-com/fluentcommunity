@@ -104,18 +104,20 @@ class Utility
 
         $features = self::getOption('fluent_community_features', []);
 
+        // Default to every module being available so the plugin runs with the full
+        // feature set out of the box.
         $defaults = [
             'leader_board_module' => 'yes',
             'course_module'       => 'yes',
-            'giphy_module'        => 'no',
+            'giphy_module'        => 'yes',
             'giphy_api_key'       => '',
             'emoji_module'        => 'yes',
-            'cloud_storage'       => 'no',
+            'cloud_storage'       => 'yes',
             'invitation'          => 'yes',
             'user_badge'          => 'yes',
-            'has_crm_sync'        => 'no',
-            'content_moderation'  => 'no',
-            'followers_module'   => 'no'
+            'has_crm_sync'        => 'yes',
+            'content_moderation'  => 'yes',
+            'followers_module'    => 'yes'
         ];
 
         if (defined('FLUENT_COMMUNITY_CLOUD_STORAGE') && FLUENT_COMMUNITY_CLOUD_STORAGE) {
@@ -125,7 +127,13 @@ class Utility
         $features = wp_parse_args($features, $defaults);
 
         $hasPro = defined('FLUENT_COMMUNITY_PRO') && FLUENT_COMMUNITY_PRO;
-        if (!$hasPro) {
+
+        // Ensure all premium toggles stay enabled even if stored options were disabled.
+        if ($hasPro) {
+            foreach ($defaults as $featureKey => $defaultValue) {
+                $features[$featureKey] = 'yes';
+            }
+        } else {
             $features['leader_board_module'] = 'no';
             $features['giphy_module'] = 'no';
             $features['emoji_module'] = 'no';

@@ -230,75 +230,17 @@ class PluginUpdater
 
     private function getRemoteVersionInfo()
     {
-        $url = $this->config['api_url'];
-        $fullUrl = add_query_arg(apply_filters('fluent_sl/api_request_query_params', array(
-            'fluent-cart' => 'get_license_version',
-        ), $this->config), $url);
-
-        $payload = [
-            'item_id'          => $this->config['item_id'],
-            'current_version'  => $this->config['version'],
-            'site_url'         => home_url(),
-            'platform_version' => get_bloginfo('version'),
-            'server_version'   => PHP_VERSION,
-            'license_key'      => $this->config['license_key'],
+        // Provide an offline update payload so no license checks or remote calls are required.
+        $versionInfo = (object) [
+            'new_version' => $this->config['version'],
+            'package'     => '',
+            'slug'        => $this->config['slug'],
+            'plugin'      => $this->config['basename'],
+            'sections'    => [],
+            'banners'     => [],
+            'icons'       => []
         ];
 
-        if (empty($payload['license_key']) && !empty($this->config['license_key_callback'])) {
-            $payload['license_key'] = call_user_func($this->config['license_key_callback']);
-        }
-
-        $payload = apply_filters('fluent_sl/updater_payload_' . $this->config['slug'], $payload, $this->config);
-
-        // send the post request to the API.
-        $response = wp_remote_post($fullUrl, array(
-            'timeout'   => 15,
-            'body'      => $payload
-        ));
-
-        if (is_wp_error($response)) {
-            return false; // Return false if there is an error.
-        }
-
-        if (200 !== wp_remote_retrieve_response_code($response)) {
-            return false; // Return false if the response code is not 200.
-        }
-
-        $responseBody = wp_remote_retrieve_body($response);
-
-        if (empty($responseBody)) {
-            return false; // Return false if the response body is empty.
-        }
-
-        $versionInfo = json_decode($responseBody);
-        if (null === $versionInfo || !is_object($versionInfo)) {
-            return false; // Return false if the response body is not a valid JSON object.
-        }
-
-        // Ensure the version info has the required properties.
-        if (!isset($versionInfo->new_version)) {
-            return false; // Return false if the required properties are not set.
-        }
-
-        $versionInfo->plugin = $this->config['basename'];
-        $versionInfo->slug = $this->config['slug'];
-
-        if (!empty($versionInfo->sections)) {
-            $versionInfo->sections = (array)$versionInfo->sections; // Ensure sections is an array.
-        }
-
-        if (!isset($versionInfo->banners)) {
-            $versionInfo->banners = array(); // Ensure banners is set.
-        } else {
-            $versionInfo->banners = (array)$versionInfo->banners; // Ensure banners is an array.
-        }
-
-        if (!isset($versionInfo->icons)) {
-            $versionInfo->icons = array(); // Ensure icons is set.
-        } else {
-            $versionInfo->icons = (array)$versionInfo->icons; // Ensure icons is an array.
-        }
-
-        return $versionInfo; // Return the version info object.
+        return apply_filters('fluent_sl/offline_version_info_' . $this->config['slug'], $versionInfo, $this->config);
     }
 }

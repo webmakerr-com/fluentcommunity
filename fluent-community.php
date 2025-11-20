@@ -2,6 +2,21 @@
 
 defined('ABSPATH') or die;
 
+// Ensure the minimum PHP version requirement is met before continuing.
+if (version_compare(PHP_VERSION, '7.3', '<')) {
+    if (function_exists('add_action')) {
+        add_action('admin_notices', function () {
+            echo '<div class="notice notice-error"><p>' . esc_html__('FluentCommunity requires PHP version 7.3 or higher.', 'fluent-community') . '</p></div>';
+        });
+    }
+
+    if (function_exists('deactivate_plugins')) {
+        deactivate_plugins(plugin_basename(__FILE__));
+    }
+
+    return;
+}
+
 /**
  * Plugin Name: FluentCommunity
  * Description: The super-fast Community Plugin for WordPress

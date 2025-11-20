@@ -1,0 +1,46 @@
+{
+    "name": "wpfluent/micro",
+    "type": "project",
+    "description": "WPFluent - The best framework to build WordPress plugins.",
+    "keywords": [
+        "WordPress",
+        "framework",
+        "WPFluent"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Sheikh Heera",
+            "email": "heera.sheikh77@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "FluentCommunityPro\\App\\": "app/",
+            "FluentCommunityPro\\Dev\\": "dev/"
+        },
+        "classmap": [],
+        "files": []
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "2.0.x-dev"
+        },
+        "wpfluent": {
+            "namespace": {
+                "current": "FluentCommunityPro",
+                "parent": "FluentCommunity"
+            }
+        }
+    },
+    "scripts": {
+        "post-update-cmd": [
+            "FluentCommunityPro\\Dev\\ComposerScript::run"
+        ],
+        "post-install-cmd": [
+            "FluentCommunityPro\\Dev\\ComposerScript::run"
+        ]
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

@@ -1,0 +1,82 @@
+{
+  "src/app.css": {
+    "file": "app.css",
+    "src": "src/app.css"
+  },
+  "src/app.js": {
+    "css": [
+      "app.css"
+    ],
+    "file": "app.js",
+    "isEntry": true,
+    "src": "src/app.js"
+  },
+  "src/admin_app.css": {
+    "file": "admin_app.css",
+    "src": "src/admin_app.css"
+  },
+  "src/admin_app.js": {
+    "css": [
+      "admin_app.css"
+    ],
+    "file": "admin_app.js",
+    "isEntry": true,
+    "src": "src/admin_app.js"
+  },
+  "src/customizer/customizer_app.css": {
+    "file": "customizer_app.css",
+    "src": "src/customizer/customizer_app.css"
+  },
+  "src/customizer/customizer_app.js": {
+    "css": [
+      "customizer_app.css"
+    ],
+    "file": "customizer_app.js",
+    "isEntry": true,
+    "src": "src/customizer/customizer_app.js"
+  },
+  "src/Onboarding/onboarding.css": {
+    "file": "onboarding.css",
+    "src": "src/Onboarding/onboarding.css"
+  },
+  "src/Onboarding/onboarding.js": {
+    "css": [
+      "onboarding.css"
+    ],
+    "file": "onboarding.js",
+    "isEntry": true,
+    "src": "src/Onboarding/onboarding.js"
+  },
+  "src/public/js/user_registration.css": {
+    "file": "user_registration.css",
+    "src": "src/public/js/user_registration.css"
+  },
+  "src/public/js/user_registration.js": {
+    "css": [
+      "user_registration.css"
+    ],
+    "file": "user_registration.js",
+    "isEntry": true,
+    "src": "src/public/js/user_registration.js"
+  },
+  "src/global.scss": {
+    "file": "global.css",
+    "isEntry": true,
+    "src": "src/global.scss"
+  },
+  "src/portal_general.js": {
+    "file": "portal_general.js",
+    "isEntry": true,
+    "src": "src/portal_general.js"
+  },
+  "src/start.js": {
+    "file": "start.js",
+    "isEntry": true,
+    "src": "src/start.js"
+  },
+  "src/theme-default.scss": {
+    "file": "theme-default.css",
+    "isEntry": true,
+    "src": "src/theme-default.scss"
+  }
+}

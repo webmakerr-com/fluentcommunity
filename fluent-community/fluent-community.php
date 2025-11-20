@@ -2,6 +2,9 @@
 
 defined('ABSPATH') or die;
 
+$fluentCommunityOutputLevel = ob_get_level();
+ob_start();
+
 /**
  * Plugin Name: FluentCommunity
  * Description: The super-fast Community Plugin for WordPress
@@ -74,5 +77,9 @@ $bootstrap(__FILE__);
 if (file_exists(FLUENT_COMMUNITY_PRO_DIR . 'boot/app.php')) {
     $proBootstrap = require(FLUENT_COMMUNITY_PRO_DIR . 'boot/app.php');
     $proBootstrap(FLUENT_COMMUNITY_PRO_DIR_FILE);
+}
+
+while (ob_get_level() > $fluentCommunityOutputLevel) {
+    ob_end_clean();
 }
 

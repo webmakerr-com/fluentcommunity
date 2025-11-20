@@ -1,5 +1,19 @@
 <?php defined('ABSPATH') or die;
 
+if (version_compare(PHP_VERSION, '7.3', '<')) {
+    if (function_exists('add_action')) {
+        add_action('admin_notices', function () {
+            echo '<div class="notice notice-error"><p>' . esc_html__('FluentCommunity Pro requires PHP version 7.3 or higher.', 'fluent-community-pro') . '</p></div>';
+        });
+    }
+
+    if (function_exists('deactivate_plugins')) {
+        deactivate_plugins(plugin_basename(__FILE__));
+    }
+
+    return;
+}
+
 /*
 Plugin Name: FluentCommunity Pro
 Description: The Pro version of FluentCommunity Plugin

@@ -8,13 +8,13 @@ return function ($file) {
         (new \FluentCommunityPro\App\Modules\ModulesInit())->register($app);
 
         $licenseManager = (new \FluentCommunityPro\App\Services\PluginManager\FluentLicensing())->register([
-            'version'      => FLUENT_COMMUNITY_PRO_VERSION, // Current version of your plugin
-            'item_id'      => 7560872, // Product ID from FluentCart
+            'version'      => FLUENT_COMMUNITY_PRO_VERSION,
+            'item_id'      => 7560872,
             'settings_key' => '__fluent_community_pro_license',
-            'basename'     => 'fluent-community-pro/fluent-community-pro.php', // Plugin basename (e.g., 'your-plugin/your-plugin.php')
-            'api_url'      => 'https://fluentapi.wpmanageninja.com/', // The API URL for license verification. Normally your store URL
-            'store_url'    => 'https://wpmanageninja.com/', // Your store URL
-            'purchase_url' => 'https://fluentcommunity.co/', // Purchase URL
+            'basename'     => FLUENT_COMMUNITY_PLUGIN_BASENAME,
+            'api_url'      => 'https://fluentapi.wpmanageninja.com/',
+            'store_url'    => 'https://wpmanageninja.com/',
+            'purchase_url' => 'https://fluentcommunity.co/',
             'activate_url' => admin_url('admin.php?page=fluent-community&license=yes'),
             'show_check_update' => true
         ]);

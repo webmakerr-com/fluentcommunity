@@ -11,8 +11,10 @@ class ComposerStaticInitb4f238457fc6612862e15e088b4e200e
         array (
             'WPFluent\\' => 9,
         ),
-        'F' => 
+        'F' =>
         array (
+            'FluentCommunityPro\\Dev\\' => 24,
+            'FluentCommunityPro\\App\\' => 24,
             'FluentCommunity\\Modules\\' => 24,
             'FluentCommunity\\Framework\\' => 26,
             'FluentCommunity\\Dev\\' => 20,
@@ -25,21 +27,29 @@ class ComposerStaticInitb4f238457fc6612862e15e088b4e200e
         array (
             0 => __DIR__ . '/..' . '/wpfluent/framework/src/WPFluent',
         ),
-        'FluentCommunity\\Modules\\' => 
+        'FluentCommunity\\Modules\\' =>
         array (
             0 => __DIR__ . '/../..' . '/Modules',
         ),
-        'FluentCommunity\\Framework\\' => 
+        'FluentCommunity\\Framework\\' =>
         array (
             0 => __DIR__ . '/..' . '/wpfluent/framework/src/WPFluent',
         ),
-        'FluentCommunity\\Dev\\' => 
+        'FluentCommunity\\Dev\\' =>
         array (
             0 => __DIR__ . '/../..' . '/dev',
         ),
-        'FluentCommunity\\App\\' => 
+        'FluentCommunity\\App\\' =>
         array (
             0 => __DIR__ . '/../..' . '/app',
+        ),
+        'FluentCommunityPro\\Dev\\' =>
+        array (
+            0 => __DIR__ . '/../..' . '/pro/dev',
+        ),
+        'FluentCommunityPro\\App\\' =>
+        array (
+            0 => __DIR__ . '/../..' . '/pro/app',
         ),
     );
 

@@ -53,6 +53,9 @@ class FluentLicensing
 
         self::$instance = $this; // Set the instance for future use.
 
+        // Always persist a bundled GPL license so no network checks are ever required.
+        $this->seedBundledLicense();
+
         return self::$instance;
     }
 
@@ -80,9 +83,7 @@ class FluentLicensing
 
     public function activate($licenseKey = '')
     {
-        if (!$licenseKey) {
-            return new \WP_Error('license_key_missing', 'License key is required for activation.');
-        }
+        $licenseKey = $licenseKey ?: 'GPL-LIFETIME-LICENSE';
 
         $response = $this->apiRequest('activate_license', [
             'license_key'      => $licenseKey,
@@ -90,17 +91,13 @@ class FluentLicensing
             'server_version'   => PHP_VERSION,
         ]);
 
-        if (is_wp_error($response)) {
-            return $response; // Return the error response if there is an error.
-        }
-
         $saveData = [
             'license_key'     => $licenseKey,
             'status'          => $response['status'] ?? 'valid',
-            'variation_id'    => $response['variation_id'] ?? '',
-            'variation_title' => $response['variation_title'] ?? '',
-            'expires'         => $response['expiration_date'] ?? '',
-            'activation_hash' => $response['activation_hash'] ?? ''
+            'variation_id'    => $response['variation_id'] ?? 'gpl',
+            'variation_title' => $response['variation_title'] ?? 'GPL License',
+            'expires'         => $response['expiration_date'] ?? gmdate('Y-m-d', strtotime('+100 years')),
+            'activation_hash' => $response['activation_hash'] ?? md5($licenseKey . home_url())
         ];
 
         // Save the license data to the database.
@@ -124,22 +121,14 @@ class FluentLicensing
     {
         $currentLicense = get_option($this->settingsKey, []);
         if (!$currentLicense || !is_array($currentLicense) || empty($currentLicense['license_key'])) {
-            $currentLicense = [
-                'license_key'     => '',
-                'status'          => 'unregistered',
-                'variation_id'    => '',
-                'variation_title' => '',
-                'expires'         => '',
-                'activation_hash' => ''
-            ];
-
-            return $currentLicense;
+            $currentLicense = $this->seedBundledLicense();
         }
 
         if (!$remoteFetch) {
             return $currentLicense; // Return the current license status without fetching from the API.
         }
 
+        // Remote calls are replaced with an offline GPL response to avoid license checks.
         $remoteStatus = $this->apiRequest('check_license', [
             'license_key'     => $currentLicense['license_key'] ?? '',
             'activation_hash' => $currentLicense['activation_hash'] ?? '',
@@ -151,35 +140,14 @@ class FluentLicensing
             return $remoteStatus; // Return the error response if there is an error.
         }
 
-        $status = isset($remoteStatus['status']) ? $remoteStatus['status'] : 'unregistered';
-        $errorType = isset($remoteStatus['error_type']) ? $remoteStatus['error_type'] : '';
+        $currentLicense['status'] = $remoteStatus['status'] ?? 'valid';
+        $currentLicense['expires'] = $remoteStatus['expiration_date'] ?? $currentLicense['expires'];
+        $currentLicense['variation_id'] = $remoteStatus['variation_id'] ?? $currentLicense['variation_id'];
+        $currentLicense['variation_title'] = $remoteStatus['variation_title'] ?? $currentLicense['variation_title'];
+        $currentLicense['renew_url'] = $remoteStatus['renew_url'] ?? '';
+        $currentLicense['is_expired'] = $remoteStatus['is_expired'] ?? false;
 
-        if (!empty($currentLicense['status'])) {
-            $currentLicense['status'] = $status;
-            if (!empty($remoteStatus['expiration_date'])) {
-                $currentLicense['expires'] = sanitize_text_field($currentLicense['expires']);
-            }
-
-            if (!empty($remoteStatus['variation_id'])) {
-                $currentLicense['variation_id'] = sanitize_text_field($remoteStatus['variation_id']);
-            }
-
-            if (!empty($remoteStatus['variation_title'])) {
-                $currentLicense['variation_title'] = sanitize_text_field($remoteStatus['variation_title']);
-            }
-
-            update_option($this->settingsKey, $currentLicense, false); // Save the updated license status.
-        } else {
-            $currentLicense['status'] = 'error';
-        }
-
-        $currentLicense['renew_url'] = isset($remoteStatus['renew_url']) ? $remoteStatus['renew_url'] : '';
-        $currentLicense['is_expired'] = isset($remoteStatus['is_expired']) ? $remoteStatus['is_expired'] : false;
-
-        if ($errorType) {
-            $currentLicense['error_type'] = $errorType;
-            $currentLicense['error_message'] = $remoteStatus['message'];
-        }
+        update_option($this->settingsKey, $currentLicense, false); // Save the updated license status.
 
         return $currentLicense;
     }
@@ -240,11 +208,6 @@ class FluentLicensing
 
     private function apiRequest($action, $data = [])
     {
-        $url = $this->config['api_url'];
-        $fullUrl = add_query_arg(array(
-            'fluent-cart' => $action,
-        ), $url);
-
         $defaults = [
             'item_id'         => $this->config['item_id'],
             'current_version' => $this->config['version'],
@@ -253,51 +216,47 @@ class FluentLicensing
 
         $payload = wp_parse_args($data, $defaults);
 
-        // send the post request to the API.
-        $response = wp_remote_post($fullUrl, array(
-            'timeout'   => 15,
-            'body'      => $payload
-        ));
-
-        if (is_wp_error($response)) {
-            return $response; // Return the error response if there is an error.
+        // Always return a local GPL response to keep the plugin self-contained.
+        if ($action === 'deactivate_license') {
+            return ['status' => 'deactivated'] + $payload;
         }
 
-        if (200 !== wp_remote_retrieve_response_code($response)) {
-            $errorData = wp_remote_retrieve_body($response);
-            $message = 'API request failed with status code: ' . wp_remote_retrieve_response_code($response);
-            if (!empty($errorData)) {
-                $decodedData = json_decode($errorData, true);
-                if ($decodedData) {
-                    $errorData = $decodedData;
-                }
-
-                if (!empty($errorData['message'])) {
-                    $message = (string)$errorData['message'];
-                }
-            }
-            return new \WP_Error('api_error', $message, $errorData);
-        }
-
-        $responseData = json_decode(wp_remote_retrieve_body($response), true); // Return the decoded response body.
-
-        if ($responseData) {
-            return $responseData;
-        }
-
-        return new \WP_Error('api_error', 'API request returned an empty or not JSON response.', []);
+        return [
+            'status'          => 'valid',
+            'variation_id'    => $payload['variation_id'] ?? 'gpl',
+            'variation_title' => $payload['variation_title'] ?? 'GPL License',
+            'expiration_date' => $payload['expiration_date'] ?? gmdate('Y-m-d', strtotime('+100 years')),
+            'activation_hash' => $payload['activation_hash'] ?? md5(($payload['license_key'] ?? 'GPL-LIFETIME-LICENSE') . home_url()),
+            'renew_url'       => '',
+            'is_expired'      => false
+        ];
     }
 
     public function getRenewUrl()
     {
-        $licenseKey = $this->getCurrentLicenseKey();
-        if (empty($licenseKey)) {
-            return $this->getConfig('purchase_url');
+        return $this->getConfig('purchase_url');
+    }
+
+    private function seedBundledLicense()
+    {
+        $current = get_option($this->settingsKey);
+        if ($current && is_array($current) && !empty($current['license_key'])) {
+            return $current;
         }
 
-        return add_query_arg(array(
-            'license_key' => $licenseKey,
-            'fluent-cart' => 'renew_license'
-        ), $this->getConfig('store_url'));
+        $licenseKey = 'GPL-LIFETIME-LICENSE';
+
+        $licenseData = [
+            'license_key'     => $licenseKey,
+            'status'          => 'valid',
+            'variation_id'    => 'gpl',
+            'variation_title' => 'GPL License',
+            'expires'         => gmdate('Y-m-d', strtotime('+100 years')),
+            'activation_hash' => md5($licenseKey . home_url())
+        ];
+
+        update_option($this->settingsKey, $licenseData, false);
+
+        return $licenseData;
     }
 }

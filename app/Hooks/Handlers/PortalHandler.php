@@ -463,6 +463,7 @@ class PortalHandler
             'user_id'                    => $userModel ? $userModel->ID : null,
             'assets_url'                 => FLUENT_COMMUNITY_PLUGIN_URL . 'assets/',
             'permissions'                => $userModel ? $userModel->getPermissions() : ['read' => true],
+            'has_pro'                    => true,
             'logo'                       => Arr::get($settings, 'logo'),
             'site_title'                 => Arr::get($settings, 'site_title'),
             'access_level'               => Arr::get($settings, 'access.acess_level'),
